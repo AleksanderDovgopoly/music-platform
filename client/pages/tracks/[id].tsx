@@ -27,11 +27,22 @@ const TrackPage: React.FC = () => {
             </Grid>
             <h1>Text track</h1>
             <p>{track.text}</p>
+            <h1>Comments</h1>
             <Grid container>
                 <TextField label="Your name" fullWidth />
                 <TextField label="Comment" fullWidth multiline rows={4} />
                 <Button>Send</Button>
             </Grid>
+            <div>
+                {
+                    track.comments.map(comment =>
+                        <div key={comment._id}>
+                            <div>Author - {comment.username}</div>
+                            <div>Comment - {comment.text}</div>
+                        </div>
+                    )
+                }
+            </div>
         </MainLayouts>
     )
 }

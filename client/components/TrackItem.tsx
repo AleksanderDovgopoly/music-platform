@@ -24,7 +24,7 @@ const TrackItem: React.FC<TrackItemProps> = ({track, active = false}) => {
                 }
             </IconButton>
             <img src={track.picture} width={70} height={70}/>
-            <Grid container direction="column" >
+            <Grid container direction="column" style={{width: 200, margin: '0 20px'}}>
                 <div>{track.name}</div>
                 <div style={{fontSize: 12, color: 'gray'}}>{track.artist}</div>
             </Grid>

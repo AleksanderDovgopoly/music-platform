@@ -24,6 +24,8 @@ const menuItems = [
     {text: 'Albums', href: '/albums'},
 ];
 
+const drawerWidth = 240;
+
 export default function Navbar() {
     const theme = useTheme();
     const router = useRouter();
@@ -38,7 +40,7 @@ export default function Navbar() {
     };
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', width: { sm: drawerWidth }, flexShrink: { sm: 0 }  }}>
             <CssBaseline />
             <div>
                 <Toolbar>
