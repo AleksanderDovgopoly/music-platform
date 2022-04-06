@@ -1,10 +1,12 @@
 import { HYDRATE } from "next-redux-wrapper";
 import {combineReducers} from "redux";
 import {playerReducer} from "./playerReducer";
+import {trackReducer} from "./trackReducer";
 
 
 const rootReducer = combineReducers({
-    player: playerReducer
+    player: playerReducer,
+    tracks: trackReducer
 })
 
 export const reducer = (state, action) => {
@@ -20,4 +22,4 @@ export const reducer = (state, action) => {
     }
 };
 
-// export type RootState = ReturnType<typeof rootReducer>;
+export type RootState = ReturnType<typeof rootReducer>;

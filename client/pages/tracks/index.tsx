@@ -1,21 +1,43 @@
 import {useRouter} from "next/router";
 import MainLayouts from "../../layouts/MainLayouts";
-import {Button, Card, Grid} from "@mui/material";
+import {Button, Card, Grid, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
-import { ITrack } from "../../types/track";
 import TrackList from "../../components/TrackList";
+import {useTypedSelector} from "../../hooks/useTypedSelector";
+import {NextThunkDispatch, wrapper} from "../../store";
+import {fetchTracks, searchTracks} from "../../store/actions-creators/track";
+import React, {useState} from "react";
+import {useDispatch} from "react-redux";
 
 
 const Index = () => {
     const router = useRouter();
-    const tracks: ITrack[] = [
-        {_id: '1', name: 'Track 1', artist: 'Artist 1', text: 'Some song text', listens: 0, audio: 'http://localhost:5000/audio/309d8386-0968-4ca9-a81f-1560245b9190.mp3', picture: 'http://localhost:5000/image/6e608f6f-5a6b-4854-8d7a-6adaf97a4452.jpg', comments: []},
-        {_id: '2', name: 'Track 2', artist: 'Artist 2', text: 'Some song text', listens: 0, audio: 'http://localhost:5000/audio/309d8386-0968-4ca9-a81f-1560245b9190.mp3', picture: 'http://localhost:5000/image/6e608f6f-5a6b-4854-8d7a-6adaf97a4452.jpg', comments: []},
-        {_id: '3', name: 'Track 3', artist: 'Artist 3', text: 'Some song text', listens: 0, audio: 'http://localhost:5000/audio/309d8386-0968-4ca9-a81f-1560245b9190.mp3', picture: 'http://localhost:5000/image/6e608f6f-5a6b-4854-8d7a-6adaf97a4452.jpg', comments: []}
-    ]
+    const {tracks, error} = useTypedSelector(state => state.tracks)
+    const [query, setQuery] = useState<string>('')
+    const [timer, setTimer] = useState(null)
+    const dispatch = useDispatch() as NextThunkDispatch
+
+    const search = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value)
+        if (timer) {
+            clearTimeout(timer)
+        }
+
+        setTimer(
+            setTimeout(async () => {
+                await dispatch(await searchTracks(e.target.value))
+            }, 500)
+        )
+    }
+
+    if (error) {
+        return <MainLayouts>
+            <h1>{error}</h1>
+        </MainLayouts>
+    }
 
     return (
-        <MainLayouts>
+        <MainLayouts title="Track list - Music platform">
             <Grid container justifyContent='center'>
                 <Card style={{width: 900}}>
                     <Box p={3}>
@@ -26,6 +48,11 @@ const Index = () => {
                             </Button>
                         </Grid>
                     </Box>
+                    <TextField
+                        fullWidth
+                        value={query}
+                        onChange={search}
+                    />
                     <TrackList tracks={tracks}/>
                 </Card>
             </Grid>
@@ -33,4 +60,11 @@ const Index = () => {
     )
 }
 
-export default Index
+export default Index;
+
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) =>
+        async () => {
+            await store.dispatch(fetchTracks());
+        }
+)

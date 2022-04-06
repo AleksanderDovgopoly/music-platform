@@ -1,15 +1,33 @@
-import React from "react";
-import MainLayouts from "../../layouts/MainLayouts";
-import {ITrack} from "../../types/track";
+import React, {useState} from "react";
+import {GetServerSideProps} from "next";
+import axios from "axios";
 import {useRouter} from "next/router";
 import {Button, Grid, TextField} from "@mui/material";
+import MainLayouts from "../../layouts/MainLayouts";
+import {useInput} from "../../hooks/useInput";
+import {ITrack} from "../../types/track";
 
-const TrackPage: React.FC = () => {
-    const track: ITrack = {_id: '1', name: 'Track 1', artist: 'Artist 1', text: 'Some song text', listens: 0, audio: 'http://localhost:5000/audio/309d8386-0968-4ca9-a81f-1560245b9190.mp3', picture: 'http://localhost:5000/image/6e608f6f-5a6b-4854-8d7a-6adaf97a4452.jpg', comments: []};
+const TrackPage = ({serverTrack}) => {
     const router = useRouter();
+    const [track, setTrack] = useState<ITrack>(serverTrack)
+    const username = useInput('')
+    const text = useInput('')
+
+    const addComment = async () => {
+        try {
+            const response = await axios.post('http://localhost:5000/tracks/comment', {
+                username: username.value,
+                text: text.value,
+                trackId: track._id
+            })
+            setTrack({...track, comments: [...track.comments, response.data]})
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
     return (
-        <MainLayouts>
+        <MainLayouts title={"Music platform - " + track.artist + " - " + track.name}>
             <Button
                 variant={"outlined"}
                 style={{fontSize: 20}}
@@ -18,7 +36,7 @@ const TrackPage: React.FC = () => {
                 To Track-list
             </Button>
             <Grid container style={{margin: '20px 0'}}>
-                <img src={track.picture} width={200} height={200}/>
+                <img src={'http://localhost:5000/' + track.picture} width={200} height={200}/>
                 <div style={{marginLeft: 30}}>
                     <h1>Track Name - {track.name}</h1>
                     <h1>Artist - {track.artist}</h1>
@@ -29,9 +47,19 @@ const TrackPage: React.FC = () => {
             <p>{track.text}</p>
             <h1>Comments</h1>
             <Grid container>
-                <TextField label="Your name" fullWidth />
-                <TextField label="Comment" fullWidth multiline rows={4} />
-                <Button>Send</Button>
+                <TextField
+                    {...username}
+                    label="Your name"
+                    fullWidth
+                />
+                <TextField
+                    {...text}
+                    label="Comment"
+                    fullWidth
+                    multiline
+                    rows={4}
+                />
+                <Button onClick={addComment}>Send</Button>
             </Grid>
             <div>
                 {
@@ -48,3 +76,13 @@ const TrackPage: React.FC = () => {
 }
 
 export default TrackPage
+
+export const getServerSideProps: GetServerSideProps = async ({params}) => {
+    const response = await axios.get('http://localhost:5000/tracks/' + params.id)
+
+    return {
+        props: {
+            serverTrack: response.data
+        }
+    }
+}
